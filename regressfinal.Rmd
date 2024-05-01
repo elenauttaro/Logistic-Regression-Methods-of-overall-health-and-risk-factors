@@ -1,0 +1,322 @@
+---
+title: "regressfinal"
+author: "Elena Uttaro"
+date: "2023-12-12"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(survival)
+library(dplyr)
+library(haven)
+library(rio)
+library(tidyverse)
+data <- read_csv("/Users/elenauttaro/Desktop/regression 2/MIDUS_III_Final_Exam_Fall2023_data.csv")
+```
+
+```{r}
+#Univariate
+data
+#smoke
+max(data$smoke)
+min(data$smoke)
+median(data$smoke)
+mean(data$smoke)
+sd(data$smoke)
+var(data$smoke)
+range(data$smoke)
+frequency(data$smoke)
+
+#male
+max(data$male)
+min(data$male)
+median(data$male)
+mean(data$male)
+sd(data$male)
+var(data$male)
+range(data$male)
+frequency(data$male)
+
+#Age
+max(data$age)
+min(data$age)
+median(data$age)
+mean(data$age)
+sd(data$age)
+var(data$age)
+range(data$age)
+frequency(data$age)
+
+#heart
+max(data$heart)
+min(data$heart)
+median(data$heart)
+mean(data$heart)
+sd(data$heart)
+var(data$heart)
+range(data$heart)
+frequency(data$heart)
+
+#cigage
+max(data$cigage)
+min(data$cigage)
+median(data$cigage)
+mean(data$cigage)
+sd(data$cigage)
+var(data$cigage)
+range(data$cigage)
+frequency(data$cigage)
+
+#alcage
+max(data$alcage)
+min(data$alcage)
+median(data$alcage)
+mean(data$alcage)
+sd(data$alcage)
+var(data$alcage)
+range(data$alcage)
+frequency(data$alcage)
+
+#depress
+max(data$depress)
+min(data$depress)
+median(data$depress)
+mean(data$depress)
+sd(data$depress)
+var(data$depress)
+range(data$depress)
+frequency(data$depress)
+
+#bp
+max(data$bp)
+min(data$bp)
+median(data$bp)
+mean(data$bp)
+sd(data$bp)
+var(data$bp)
+range(data$bp)
+frequency(data$bp)
+
+#exercise
+max(data$exercise)
+min(data$exercise)
+median(data$exercise)
+mean(data$exercise)
+sd(data$exercise)
+var(data$exercise)
+range(data$exercise)
+frequency(data$exercise)
+
+#health
+max(data$health)
+min(data$health)
+median(data$health)
+mean(data$health)
+sd(data$health)
+var(data$health)
+range(data$health)
+frequency(data$health)
+```
+
+
+```{r}
+#Bivariate
+#heart
+variables <- c("smoke", "male", "age", "cigage", "alcage", "depress", "bp", "exercise")
+for (variable in variables) {
+  contingency_table <- table(data$heart, data[[variable]])
+  result <- chisq.test(contingency_table)
+  
+  cat("Chi-square test between 'heart' and", variable, ":\n")
+  print(result)
+  cat("\n")
+}
+
+#health
+variables_health <- c("smoke", "male", "age", "cigage", "alcage", "depress", "bp", "exercise")
+for (variable in variables_health) {
+  contingency_table_health <- table(data$health, data[[variable]])
+  result_health <- chisq.test(contingency_table_health)
+  
+  cat("Chi-square test between 'health' and", variable, ":\n")
+  print(result_health)
+  cat("\n")
+}
+```
+
+
+```{r}
+#heart
+heartsmoke <- table(data$heart,data$smoke)
+chisq.test(heartsmoke)
+
+heartmale <- table(data$heart,data$male)
+chisq.test(heartmale)
+
+heartage <- table(data$heart,data$age)
+chisq.test(heartage)
+
+heartcigage <- table(data$heart,data$cigage)
+chisq.test(heartcigage)
+
+heartalcage <- table(data$heart,data$alcage)
+chisq.test(heartalcage)
+
+heartdepress <- table(data$heart,data$depress)
+chisq.test(heartdepress)
+
+heartbp <- table(data$heart,data$bp)
+chisq.test(heartbp)
+
+heartexercise <- table(data$heart,data$exercise)
+chisq.test(heartexercise)
+```
+
+
+```{r}
+#health
+healthsmoke <- table(data$health,data$smoke)
+chisq.test(healthsmoke)
+
+healthmale <- table(data$health,data$male)
+chisq.test(healthmale)
+
+healthage <- table(data$health,data$age)
+chisq.test(healthage)
+
+healthcigage <- table(data$health,data$cigage)
+chisq.test(healthcigage)
+
+healthalcage <- table(data$health,data$alcage)
+chisq.test(healthalcage)
+
+healthdepress <- table(data$health,data$depress)
+chisq.test(healthdepress)
+
+healthbp <- table(data$health,data$bp)
+chisq.test(healthbp)
+
+healthexercise <- table(data$health,data$exercise)
+chisq.test(healthexercise)
+```
+
+
+
+```{r}
+library(readr)
+MIDUS <-read_csv("/Users/elenauttaro/Desktop/regression 2/MIDUS_III_Final_Exam_Fall2023_data.csv")
+View(MIDUS)
+
+# Snippet of the dataset
+head(MIDUS, 15)
+############################################################################################
+
+# Poisson Regression and Negative Binomial Regression
+
+# Load necessary libraries
+install.packages("glmnet")
+library(glmnet)
+library(caret)
+library(psych)
+
+MIDUS$health <- as.numeric(MIDUS$health)
+
+# Obtain the descriptive statistics of the outcome variable 'health' and check the assumption
+describe(MIDUS$health)
+
+
+# Fit a Poisson regression model
+poisson_model <- glm(health ~ depress + alcage + cigage + age + bp,
+                     data = MIDUS,
+                     family = "poisson")
+
+summary(poisson_model)
+
+
+# Showing the list of Odds Ratios and Confidence Intervals for each predictor
+exp(cbind(OR = coef(poisson_model), confint(poisson_model)))
+
+library(MASS)
+install.packages("pscl")
+library(pscl)
+
+# Fit a negative binomial regression model
+nb_model <- glm.nb(health ~ depress + alcage + cigage + age + bp,
+                     data = MIDUS)
+
+summary(nb_model)
+
+exp(cbind(OR = coef(nb_model), confint(nb_model)))
+
+
+library(lmtest)
+lrtest(poisson_model,nb_model)
+
+list(c(AIC(poisson_model), AIC(nb_model)))
+list(c(BIC(poisson_model), BIC(nb_model)))
+
+LL <- as.numeric(2 *(logLik(poisson_model) - logLik(nb_model)))
+pchisq(LL, df = 4-3,lower.tail=FALSE)
+
+
+#Ordered mulitnomial
+library(nnet)
+library(VGAM)
+
+MIDUS$health <- factor(MIDUS$health, levels = c(1 ,2 ,3 ,4))
+
+set.seed(123)
+trainIndex <- createDataPartition(MIDUS$health, p =0.7, list = FALSE, times = 1)
+train_data <- MIDUS[trainIndex,]
+test_data <- MIDUS[-trainIndex,]
+
+full_model <- vglm(health ~ age + male + heart + cigage + smoke + alcage + depress + bp + exercise, family = cumulative(parallel = TRUE), data = train_data)
+summary(full_model)
+
+# 1.0083864 1.1177247 0.3906666 0.9902604 0.6681867 0.9929556 0.3155241 0.4225003 1.1674230 
+
+# Step 1: Fit the main effects multinomial logistic regression  model:
+main_effects_model <- vglm(health ~ depress + alcage + cigage + age + bp, family = cumulative(parallel = TRUE), data = train_data)
+summary(main_effects_model)
+
+
+probabilities_full <- predict(full_model, newdata = test_data, type = "response")
+head(probabilities_full)
+row_sums_full <- rowSums(probabilities_full)
+all(round(row_sums_full,3)==1)
+
+prob_main <- predict(main_effects_model, newdata = test_data, type= "response")
+row_sums_main <- rowSums(prob_main)
+all(round(row_sums_main,3)==1)
+
+conditions_depress_0 <- data.frame(age = 64, male = 0, heart = 0, cigage = mean(test_data$cigage),
+                                   smoke = 0, alcage = mean(test_data$alcage), depress = 0,
+                                   bp = mean(test_data$bp), exercise = mean(test_data$exercise))
+
+conditions_depress_1 <- data.frame(age = 64, male = 0, heart = 0, cigage = mean(test_data$cigage),
+                                   smoke = 0, alcage = mean(test_data$alcage), depress = 1,
+                                   bp = mean(test_data$bp), exercise = mean(test_data$exercise))
+
+predicted_probs_depress_0 <- predict(full_model, newdata = conditions_depress_0, type = "response")
+predicted_probs_depress_1 <- predict(full_model, newdata = conditions_depress_1, type = "response")
+
+diff_probs <- predicted_probs_depress_1 - predicted_probs_depress_0
+head(diff_probs)
+
+lrtest(main_effects_model, full_model)
+anova(full_model, test = "LRT")
+anova(main_effects_model, test = "LRT")
+plot(full_model)
+plot(main_effects_model)
+
+AIC(full_model)
+BIC(full_model)
+
+AIC(main_effects_model)
+BIC(main_effects_model)
+```
+
